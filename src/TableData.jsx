@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 
