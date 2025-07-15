@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
+import { GiReturnArrow } from "react-icons/gi";
 import { IoCloseOutline } from "react-icons/io5";
 
 function TableData() {
@@ -28,18 +29,23 @@ function TableData() {
   });
 
   const [Show, setShow] = useState(false);
-
   const [filterLocation, setFilteredLocation] = useState([]);
+  const [DisplayData, SetDisplayData] = useState([...dataArr]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setDataArr([...dataArr, data]);
-    // setFilterApplied([...dataArr, data]);
-    SetDisplayData([...dataArr, data]);
-    console.log(dataArr);
+    const updatedData = [...dataArr, data];
+    // setDataArr([...dataArr, data]);
+    // SetDisplayData([...dataArr, data]);
+    setDataArr(updatedData);
+    SetDisplayData(updatedData);
 
     setData({ companyId: "", locationId: "", isGlobal: false });
   };
+
+  useEffect(() => {
+    console.log("display Data", DisplayData);
+  }, [DisplayData]);
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
@@ -52,7 +58,7 @@ function TableData() {
       const relatedloc = locations.filter((loc) => loc.companyId === value);
       console.log("locations", locations);
       setFilteredLocation(relatedloc);
-      console.log(filterLocation);
+      console.log("Filtered location", filterLocation);
     }
     console.log("value", value);
   };
@@ -60,13 +66,13 @@ function TableData() {
   const [asc, setAsc] = useState(false);
 
   function Sort(field) {
-    const sortedData = [...dataArr].sort((a, b) => {
+    const sortedData = [...DisplayData].sort((a, b) => {
       if (a[field] < b[field]) return asc ? -1 : 1;
       if (a[field] > b[field]) return asc ? 1 : -1;
       return 0;
     });
     setAsc(!asc);
-    setDataArr(sortedData);
+    // setDataArr(sortedData);
     SetDisplayData(sortedData);
     console.log(AvailableCompany);
     console.log(dataArr);
@@ -76,11 +82,7 @@ function TableData() {
   const [selectedLocation, setSelectedLocation] = useState([]);
 
   const toggleSelect = (value, selectedData, setSelectedData) => {
-    setSelectedData(
-      selectedData.includes(value)
-        ? selectedData.filter((v) => v !== value)
-        : [...selectedData, value]
-    );
+    setSelectedData([...selectedData, value]);
   };
 
   const AvailableLocation = [
@@ -109,9 +111,6 @@ function TableData() {
 
   const [filterApplied, setFilterApplied] = useState([...dataArr]);
 
-  const [DisplayData,SetDisplayData] =useState([...dataArr]);
-
-
   const ApplyFilter = () => {
     const FilterData = dataArr.filter((item) => {
       const company =
@@ -121,11 +120,14 @@ function TableData() {
         selectedLocation.length === 0 ||
         selectedLocation.includes(item.locationId);
 
+      console.log("selected location", typeof item.companyId);
       return company && location;
     });
+
+    console.log("selected company", selectedCompany);
     setFilterApplied(FilterData);
-    SetDisplayData(filterApplied);
-    console.log("Filtered Data", filterApplied);
+    SetDisplayData(FilterData);
+    console.log("Filtered Data", FilterData);
   };
 
   const DeleteItem = (companyId, locationId, isGlobal) => {
@@ -146,32 +148,40 @@ function TableData() {
     setDataArr(filterDelete);
   };
 
-  const[searchInput,setSearchInput]=useState();
+  const [searchInput, setSearchInput] = useState();
 
-    const SearchData =()=>{
-
-      const SearchBased=filterApplied.length >0 ? filterApplied : dataArr ;
-
-      const searched=SearchBased.filter(item=>item.companyId===searchInput || item.locationId===searchInput)
-
-      console.log("Searched Element",searched);
-
-      // setFilterApplied(searched);
-      SetDisplayData(searched)
-
-
+  const SearchData = (e) => {
+    const searchValue = e.target.value.toUpperCase();
+    setSearchInput(searchValue);
+    //this is becasue i am initial setting the filter 
+    // state with while data so that after filter checkboc 
+    // is applied and cleared it stores the whole data in the filter 
+    // applied before 
+    // searchin is done other wise older filter data will be considered
+    setFilterApplied([...DisplayData]);
+    if (searchValue.trim() === "") {
+      SetDisplayData([...filterApplied]);
+      return;
     }
-    
-    const HandleClear=()=> {
-              setSelectedCompany([]);
-              setSelectedLocation([]);
-              setSearchInput("");
-              setFilterApplied([...dataArr]);
-              SetDisplayData([...dataArr]);
 
-            }
+    const searched = DisplayData.filter(
+      (item) =>
+        item.companyId.includes(searchValue) ||
+        item.locationId.includes(searchValue)
+    );
 
+    SetDisplayData(searched);
+  };
 
+  const HandleClear = () => {
+    setSelectedCompany([]);
+    setSelectedLocation([]);
+    setSearchInput("");
+
+    setAsc(false);
+    // setFilterApplied([...dataArr]);
+    SetDisplayData([...dataArr]);
+  };
 
   return (
     <>
@@ -224,7 +234,7 @@ function TableData() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Filter By Loction
+              Filter By Location
             </button>
             <ul className="dropdown-menu">
               {AvailableLocation.map((location) => (
@@ -252,6 +262,9 @@ function TableData() {
           {/* Clear and apply filter Filter Button */}
 
           <button
+            disabled={
+              selectedCompany.length === 0 && selectedLocation.length === 0
+            }
             className="btn btn-warning"
             onClick={() => {
               ApplyFilter();
@@ -259,10 +272,7 @@ function TableData() {
           >
             Apply Filter
           </button>
-          <button
-            className="btn btn-danger"
-            onClick={HandleClear}
-          >
+          <button className="btn btn-danger" onClick={HandleClear}>
             Clear
           </button>
           <input
@@ -271,15 +281,9 @@ function TableData() {
             placeholder="Search"
             aria-label="Search"
             value={searchInput || ""}
-            onChange={(e)=>setSearchInput(e.target.value.toUpperCase())}
-          required/>
-          <button
-            className="btn btn-outline-success my-2 my-sm-0"
-            type="submit"
-            onClick={SearchData}
-          >
-            Search
-          </button>
+            onChange={SearchData}
+            required
+          />
         </div>
       </div>
       <div className="container-fluid mt-2">
@@ -388,11 +392,11 @@ function TableData() {
                     required
                   >
                     <option value="">Select Company</option>
-                    {companies.map((comp) => (
+                    {companies.map((comp, index) => (
                       <option
                         className="form-select text-white"
                         value={comp.name}
-                        key={comp.id}
+                        key={index}
                       >
                         {comp.name}
                       </option>
