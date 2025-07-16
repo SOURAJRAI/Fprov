@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
 import { GiReturnArrow } from "react-icons/gi";
 import { IoCloseOutline } from "react-icons/io5";
+import axios from "axios";
 
 function TableData() {
   const companies = [{ name: "1" }, { name: "2" }, { name: "3" }];
@@ -35,17 +36,22 @@ function TableData() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const updatedData = [...dataArr, data];
+
     // setDataArr([...dataArr, data]);
     // SetDisplayData([...dataArr, data]);
     setDataArr(updatedData);
     SetDisplayData(updatedData);
 
+    axios
+      .post("http://localhost:5000/add", { companies: data })
+      .then(() => {
+        console.log("Data", data);
+        location.reload();
+      })
+      .catch((err) => console.log(err));
+
     setData({ companyId: "", locationId: "", isGlobal: false });
   };
-
-  useEffect(() => {
-    console.log("display Data", DisplayData);
-  }, [DisplayData]);
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
@@ -58,6 +64,7 @@ function TableData() {
       const relatedloc = locations.filter((loc) => loc.companyId === value);
       console.log("locations", locations);
       setFilteredLocation(relatedloc);
+
       console.log("Filtered location", filterLocation);
     }
     console.log("value", value);
@@ -82,7 +89,21 @@ function TableData() {
   const [selectedLocation, setSelectedLocation] = useState([]);
 
   const toggleSelect = (value, selectedData, setSelectedData) => {
-    setSelectedData([...selectedData, value]);
+    const isSelected= selectedData.includes(value);
+    const selectedCheckbox= isSelected ? selectedData.filter((v)=> v!==value) : [...selectedData, value];
+    setSelectedData(selectedCheckbox);
+
+    if(selectedData===selectedCompany && isSelected){
+      const relatedLocation=locations.filter(v=>v.companyId===value).map(l=>l.name)
+       setSelectedLocation((prev)=>
+        prev.filter((loc)=>!relatedLocation.includes(loc))
+      );
+    }
+    console.log("Selected",isSelected);
+    console.log("SelectedCompanes",selectedCompany)
+    console.log("selectedCheckbox",selectedCheckbox);
+    console.log("location",locations);
+
   };
 
   const AvailableLocation = [
@@ -153,10 +174,10 @@ function TableData() {
   const SearchData = (e) => {
     const searchValue = e.target.value.toUpperCase();
     setSearchInput(searchValue);
-    //this is becasue i am initial setting the filter 
-    // state with while data so that after filter checkboc 
-    // is applied and cleared it stores the whole data in the filter 
-    // applied before 
+    //this is becasue i am initial setting the filter
+    // state with while data so that after filter checkboc
+    // is applied and cleared it stores the whole data in the filter
+    // applied before
     // searchin is done other wise older filter data will be considered
     setFilterApplied([...DisplayData]);
     if (searchValue.trim() === "") {
@@ -195,37 +216,6 @@ function TableData() {
           </button>
           {/* //company Filter */}
           {/* filtering using checkbox*/}
-          <div className="dropdown">
-            <button
-              className="btn btn-info dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Filter By company
-            </button>
-            <ul className="dropdown-menu">
-              {AvailableCompany.map((company) => (
-                <li key={company}>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input m-1"
-                      type="checkbox"
-                      checked={selectedCompany.includes(company)}
-                      onChange={() =>
-                        toggleSelect(
-                          company,
-                          selectedCompany,
-                          setSelectedCompany
-                        )
-                      }
-                    />
-                    <label className="form-check-label">{company}</label>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
 
           <div className="dropdown">
             <button
@@ -234,29 +224,105 @@ function TableData() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Filter By Location
+              Filter
             </button>
-            <ul className="dropdown-menu">
-              {AvailableLocation.map((location) => (
-                <li key={location}>
-                  <div className="form-check">
+
+            {/* <div className="dropdown-menu p-3" style={{ width: "300px" }}>
+              <div className="row">
+                
+                <div className="col-6 border-end">
+                  <h6 className="dropdown-header p-0 mb-2">Company</h6>
+                  {AvailableCompany.map((company) => (
+                    <div className="form-check" key={company}>
+                      <input
+                        className="form-check-input m-1"
+                        type="checkbox"
+                        checked={selectedCompany.includes(company)}
+                        onChange={() =>
+                          setSelectedCompany(
+                            selectedCompany.includes(company)
+                              ? selectedCompany.filter((v) => v !== company)
+                              : [...selectedCompany, company]
+                          )
+                        }
+                      />
+                      <label className="form-check-label">{company}</label>
+                    </div>
+                  ))}
+                </div>
+
+            
+                { selectedCompany.length>0&&(
+
+                  <div className="col-6" style={{ display: selectedCompany.length > 0 ? "block" : "none" }}>
+                  <h6 className="dropdown-header p-0 mb-2">Location</h6>
+                  {AvailableLocation.map((location) => (
+                    <div className="form-check" key={location}>
+                      <input
+                        className="form-check-input m-1"
+                        type="checkbox"
+                        checked={selectedLocation.includes(location)}
+                        onChange={() =>
+                          setSelectedLocation(
+                            selectedLocation.includes(location)
+                            ? selectedLocation.filter((l) => l !== location)
+                            : [...selectedLocation, location]
+                          )
+                        }
+                        />
+                      <label className="form-check-label">{location}</label>
+                    </div>
+                  ))}
+                </div>
+              ) }
+              </div>
+              </div> */}
+
+            <div
+              className="dropdown-menu d-flex p-3"
+            >
+              {/* Company Filter (Left Panel) */}
+              <div style={{ minWidth: "80px" }}>
+                <h6 className="dropdown-header p-0 mb-2">Company</h6>
+                {AvailableCompany.map((company) => (
+                  <div className="form-check ms-2" key={company}>
                     <input
-                      className="form-check-input m-1"
+                      className="form-check-input"
                       type="checkbox"
-                      checked={selectedLocation.includes(location)}
-                      onChange={() =>
-                        toggleSelect(
+                      checked={selectedCompany.includes(company)}
+                      onChange={()=>toggleSelect(
+                        company,
+                        selectedCompany,
+                        setSelectedCompany
+                      )}
+                    />
+                    <label className="form-check-label">{company}</label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Location Filter (Right Panel, only if company is selected) */}
+              {selectedCompany.length > 0 && (
+                <div style={{ minWidth: "80px" }}>
+                  <h6 className="dropdown-header p-0 mb-2">Location</h6>
+                  {AvailableLocation.map((location) => (
+                    <div className="form-check ms-2" key={location}>
+                      <input
+                        className="form-check-input "
+                        type="checkbox"
+                        checked={selectedLocation.includes(location)}
+                        onChange={()=>toggleSelect(
                           location,
                           selectedLocation,
                           setSelectedLocation
-                        )
-                      }
-                    />
-                    <label className="form-check-label">{location}</label>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                        )}
+                      />
+                      <label className="form-check-label">{location}</label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Clear and apply filter Filter Button */}
