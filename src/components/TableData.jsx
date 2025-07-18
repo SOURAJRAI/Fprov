@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
 import { GiReturnArrow } from "react-icons/gi";
 import { IoCloseOutline } from "react-icons/io5";
-import axios from "axios";
+import axios from 'axios';
+import { useEffect } from "react";
 
 function TableData() {
   const companies = [{ name: "1" }, { name: "2" }, { name: "3" }];
@@ -19,34 +20,46 @@ function TableData() {
     { name: "I", companyId: "3" },
   ];
 
-  const [dataArr, setDataArr] = useState([
-    { companyId: "1", locationId: "A", isGlobal: false },
-    { companyId: "2", locationId: "D", isGlobal: true },
-  ]);
+  const [dataArr, setDataArr] = useState([]);
   const [data, setData] = useState({
     companyId: "",
     locationId: "",
     isGlobal: false,
   });
+  const [isUpdated,SetIsUpdated]=useState(false)
 
   const [Show, setShow] = useState(false);
   const [filterLocation, setFilteredLocation] = useState([]);
   const [DisplayData, SetDisplayData] = useState([...dataArr]);
+  
+
+
+  useEffect(()=>{
+    axios.get("http://localhost:5000/getAllCompanies")
+      .then((res) =>{
+        setDataArr(res.data)
+        SetDisplayData(res.data)
+        SetIsUpdated(false);
+      console.log(res.data)
+  })
+      .catch(err=>console.error(err));
+  },[isUpdated]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const updatedData = [...dataArr, data];
+      
+    // const updatedData = [...dataArr, data];
 
     // setDataArr([...dataArr, data]);
     // SetDisplayData([...dataArr, data]);
-    setDataArr(updatedData);
-    SetDisplayData(updatedData);
+    // setDataArr(updatedData);
+    // SetDisplayData(updatedData);
 
     axios
-      .post("http://localhost:5000/add", { companies: data })
-      .then(() => {
-        console.log("Data", data);
-        location.reload();
+      .post("http://localhost:5000/add", data)
+      .then(()=> {
+        SetIsUpdated(true)
       })
       .catch((err) => console.log(err));
 
@@ -74,9 +87,15 @@ function TableData() {
 
   function Sort(field) {
     const sortedData = [...DisplayData].sort((a, b) => {
-      if (a[field] < b[field]) return asc ? -1 : 1;
-      if (a[field] > b[field]) return asc ? 1 : -1;
-      return 0;
+      let value1=a[field]
+      let value2=b[field]
+      if(asc)
+      {
+        return value1.localeCompare(value2);
+      }
+      else{
+        return value2.localeCompare(value1);
+      }
     });
     setAsc(!asc);
     // setDataArr(sortedData);
@@ -151,22 +170,11 @@ function TableData() {
     console.log("Filtered Data", FilterData);
   };
 
-  const DeleteItem = (companyId, locationId, isGlobal) => {
-    const filterDelete = filterApplied.filter(
-      (item) =>
-        item.companyId !== companyId ||
-        item.locationId !== locationId ||
-        item.isGlobal !== isGlobal
-    );
-
-    console.log("filter Data", filterApplied);
-    console.log("Company ID", companyId);
-    console.log("Location ID", locationId);
-    console.log("Global", isGlobal);
-    console.log("Global", filterDelete);
-    // setFilterApplied(filterDelete);
-    SetDisplayData(filterDelete);
-    setDataArr(filterDelete);
+  const DeleteItem = async(id) => {
+    console.log("dlete",id)
+    await axios.delete(`http://localhost:5000/delete/${id}`)
+    .then(()=>SetIsUpdated(true))
+    .catch((err)=>console.log(err))
   };
 
   const [searchInput, setSearchInput] = useState();
@@ -227,61 +235,15 @@ function TableData() {
               Filter
             </button>
 
-            {/* <div className="dropdown-menu p-3" style={{ width: "300px" }}>
-              <div className="row">
-                
-                <div className="col-6 border-end">
-                  <h6 className="dropdown-header p-0 mb-2">Company</h6>
-                  {AvailableCompany.map((company) => (
-                    <div className="form-check" key={company}>
-                      <input
-                        className="form-check-input m-1"
-                        type="checkbox"
-                        checked={selectedCompany.includes(company)}
-                        onChange={() =>
-                          setSelectedCompany(
-                            selectedCompany.includes(company)
-                              ? selectedCompany.filter((v) => v !== company)
-                              : [...selectedCompany, company]
-                          )
-                        }
-                      />
-                      <label className="form-check-label">{company}</label>
-                    </div>
-                  ))}
-                </div>
-
             
-                { selectedCompany.length>0&&(
-
-                  <div className="col-6" style={{ display: selectedCompany.length > 0 ? "block" : "none" }}>
-                  <h6 className="dropdown-header p-0 mb-2">Location</h6>
-                  {AvailableLocation.map((location) => (
-                    <div className="form-check" key={location}>
-                      <input
-                        className="form-check-input m-1"
-                        type="checkbox"
-                        checked={selectedLocation.includes(location)}
-                        onChange={() =>
-                          setSelectedLocation(
-                            selectedLocation.includes(location)
-                            ? selectedLocation.filter((l) => l !== location)
-                            : [...selectedLocation, location]
-                          )
-                        }
-                        />
-                      <label className="form-check-label">{location}</label>
-                    </div>
-                  ))}
-                </div>
-              ) }
-              </div>
-              </div> */}
 
             <div
-              className="dropdown-menu d-flex p-3"
+              className="dropdown-menu p-3"
             >
               {/* Company Filter (Left Panel) */}
+              <div className="d-flex">
+
+              
               <div style={{ minWidth: "80px" }}>
                 <h6 className="dropdown-header p-0 mb-2">Company</h6>
                 {AvailableCompany.map((company) => (
@@ -322,6 +284,7 @@ function TableData() {
                   ))}
                 </div>
               )}
+              </div>
             </div>
           </div>
 
@@ -413,9 +376,7 @@ function TableData() {
                           style={{ color: "red" }}
                           onClick={() =>
                             DeleteItem(
-                              data.companyId,
-                              data.locationId,
-                              data.isGlobal
+                             data._id
                             )
                           }
                         />
