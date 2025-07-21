@@ -1,41 +1,65 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Signup() {
-  
-  const [signUpCredentials,setSignUpCredentials]=useState({
-    username:"",
-    email:"",
-    password:"",
-    confirmPassword:""
-  })
+  const navigate = useNavigate();
 
-  const handleChange=(e)=>{
-      const {name,value}=e.target
-       
+  const [signUpCredentials, setSignUpCredentials] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-        setSignUpCredentials({...signUpCredentials,[name]:value});
-
-
-  }
-
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-           
-            const pass1 = signUpCredentials["password"];
-        const pass2 = signUpCredentials["confirmPassword"];
-       
-     if(pass1 !== pass2)
-        {
-          alert("Password Doesnt match");
-          return 
-
-        }
-    console.log("Sign Up form submitted",signUpCredentials);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSignUpCredentials({ ...signUpCredentials, [name]: value });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const username = signUpCredentials["username"];
+    const email = signUpCredentials["email"];
+
+    const pass1 = signUpCredentials["password"];
+    const pass2 = signUpCredentials["confirmPassword"];
+
+    if (pass1 !== pass2) {
+      alert("Password Doesnt match");
+      return;
+    }
+
+    console.log("Sign Up form submitted", {
+      username: username,
+      email: email,
+      password: pass1,
+    });
+
+    axios
+      .post("http://localhost:5000/api/signup", {
+        username: username,
+        email: email,
+        password: pass1,
+      })
+      .then((res) => {
+        if (res.data.Signup) {
+          toast.success("User Registered");
+          navigate("/login");
+        } else {
+          toast.error(res.data.message);
+        }
+      })
+      .catch((err) => console.log(err));
+
+    setSignUpCredentials({
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+  };
 
   return (
     <section className="vh-100">
@@ -50,7 +74,7 @@ function Signup() {
           </div>
           <div className="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
             <form onSubmit={handleSubmit}>
-                <h3 className="text-primary fw-bold mb-3">Create an Account</h3>
+              <h3 className="text-primary fw-bold mb-3">Create an Account</h3>
               {/* Username input */}
               <div data-mdb-input-init className="form-outline mb-4">
                 <label className="form-label" htmlFor="form1ExampleUsername">
@@ -75,8 +99,8 @@ function Signup() {
                   type="email"
                   id="form1ExampleEmail"
                   className="form-control  form-control-lg"
-                 name="email"
-                 onChange={handleChange}
+                  name="email"
+                  onChange={handleChange}
                   required
                 />
               </div>

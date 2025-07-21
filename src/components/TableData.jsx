@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
-import { GiReturnArrow } from "react-icons/gi";
 import { IoCloseOutline } from "react-icons/io5";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 import axios from 'axios';
 import { useEffect } from "react";
+import {toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
+
 
 function TableData() {
   const companies = [{ name: "1" }, { name: "2" }, { name: "3" }];
@@ -20,6 +24,7 @@ function TableData() {
     { name: "I", companyId: "3" },
   ];
 
+  const navigate=useNavigate();
   const [dataArr, setDataArr] = useState([]);
   const [data, setData] = useState({
     companyId: "",
@@ -32,19 +37,45 @@ function TableData() {
   const [filterLocation, setFilteredLocation] = useState([]);
   const [DisplayData, SetDisplayData] = useState([...dataArr]);
   
-
-
+  
+  axios.defaults.withCredentials=true;
   useEffect(()=>{
-    axios.get("http://localhost:5000/getAllCompanies")
+    axios.get("http://localhost:5000/api/getAllCompanies")
       .then((res) =>{
-        setDataArr(res.data)
-        SetDisplayData(res.data)
-        SetIsUpdated(false);
-      console.log(res.data)
+       
+          setDataArr(res.data.data)
+          SetDisplayData(res.data.data)
+          SetIsUpdated(false);
+        console.log(res.data)
+       
   })
-      .catch(err=>console.error(err));
+      .catch(err=>{
+        if(err.response && err.response.status ===401)
+
+          {
+            navigate('/')
+          }
+        console.error(err)
+      }
+      );
   },[isUpdated]);
 
+  useEffect(()=>{
+ axios.get("http://localhost:5000/api/isAuthenticated")
+   .then((res) =>{
+     if(res.data.authenticated)
+       {
+      navigate('/dashboard');
+       }
+   
+})
+   .catch((err)=> 
+   { 
+    console.log(err);
+    // toast.error("Please Login")
+    navigate('/');
+    })
+   },[]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,7 +88,7 @@ function TableData() {
     // SetDisplayData(updatedData);
 
     axios
-      .post("http://localhost:5000/add", data)
+      .post("http://localhost:5000/api/add", data)
       .then(()=> {
         SetIsUpdated(true)
       })
@@ -212,8 +243,22 @@ function TableData() {
     SetDisplayData([...dataArr]);
   };
 
+  const HandleLogout =()=>{
+    axios.post("http://localhost:5000/api/logout")
+    .then(()=>{
+      // toast.success("Logged oout Successfully")
+      navigate("/",{state:{toastMsg:"logged out Successfully"}
+      });
+    })
+    .catch((err)=>{
+      console.log(err);
+      toast.error("Logout Failed")
+    })
+  }
+
   return (
     <>
+    <ToastContainer/>
       <div className="container-fluid mt-3">
         <div className="d-flex align-items-center gap-3">
           <button
@@ -313,6 +358,7 @@ function TableData() {
             onChange={SearchData}
             required
           />
+        <RiLogoutCircleRLine size={30} color="red"  className="ms-auto" onClick={HandleLogout}/>
         </div>
       </div>
       <div className="container-fluid mt-2">
@@ -421,7 +467,7 @@ function TableData() {
                     <option value="">Select Company</option>
                     {companies.map((comp, index) => (
                       <option
-                        className="form-select text-white"
+                        className="form-select"
                         value={comp.name}
                         key={index}
                       >
@@ -439,7 +485,7 @@ function TableData() {
                     <option value="">Select Company</option>
                     {filterLocation.map((loc) => (
                       <option
-                        className="form-select text-white"
+                        className="form-select "
                         value={loc.name}
                         key={loc.id}
                       >
