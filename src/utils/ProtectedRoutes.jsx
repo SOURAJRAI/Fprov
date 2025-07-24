@@ -14,7 +14,7 @@ function ProtectedRoutes() {
         const res = await axios.get(
           "http://localhost:5000/api/Auth/isAuthenticated"
         );
-        console.log(res);
+        console.log("during authentication",res);
 
         setIsAuth(res.data.authenticated);
       } catch (err) {

@@ -11,6 +11,7 @@ function Login() {
     email: "",
     password: "",
   });
+  
 
   const HandleChange = (e) => {
     setLoginCredentials({
@@ -67,6 +68,7 @@ function Login() {
        
          
             navigate("/",{state:{toastMsg:"Login Successfull"}});
+            
          
           console.log("result", result);
         } 

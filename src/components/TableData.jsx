@@ -45,7 +45,7 @@ function TableData() {
         setDataArr(res.data.data);
         SetDisplayData(res.data.data);
         SetIsUpdated(false);
-        console.log(res.data);
+        // console.log(res.data);
       })
       .catch((err) => {
         if (err.response && err.response.status === 401) {

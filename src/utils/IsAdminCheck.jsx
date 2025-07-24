@@ -2,11 +2,14 @@ import axios from 'axios';
 import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 function IsAdminCheck() {
 
     
     const [isAdmin, setIsAdmin] = useState(false);
+
+    const navigate=useNavigate();
   axios.defaults.withCredentials=true;
   useEffect(() => {
     axios
@@ -19,7 +22,7 @@ function IsAdminCheck() {
         })
         .catch((err)=>{
           setIsAdmin(false);
-        
+            navigate('/');
           console.log("Error ",err)
         });
   }, []);
@@ -28,4 +31,3 @@ function IsAdminCheck() {
 }
 
 export default IsAdminCheck;
-

@@ -37,9 +37,9 @@ function Dashboard() {
         });
         const companyName = Object.keys(companyWise);
         const CompanyValues = Object.values(companyWise);
-        console.log("companyName", companyName);
-        console.log("companyValues", CompanyValues);
-        console.log("CompanyWise", companyWise);
+        // console.log("companyName", companyName);
+        // console.log("companyValues", CompanyValues);
+        // console.log("CompanyWise", companyWise);
         setCompanyData({ categories: companyName, data: CompanyValues });
 
         const locationWise = {};
@@ -58,9 +58,9 @@ function Dashboard() {
 
         const locationName = Object.keys(locationWise);
         const locationValues = Object.values(locationWise);
-        console.log("locationName", locationName);
-        console.log("locationValues", locationValues);
-        console.log("locationWise", locationWise);
+        // console.log("locationName", locationName);
+        // console.log("locationValues", locationValues);
+        // console.log("locationWise", locationWise);
         setLocationData({ categories: locationName, data: locationValues });
       })
       .catch((err) => console.log(err));
