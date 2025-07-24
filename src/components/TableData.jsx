@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrash } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 import { RiLogoutCircleRLine } from "react-icons/ri";
-import axios from 'axios';
+import axios from "axios";
 import { useEffect } from "react";
-import {toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-
-
+import { toast, ToastContainer } from "react-toastify";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function TableData() {
   const companies = [{ name: "1" }, { name: "2" }, { name: "3" }];
@@ -24,62 +22,71 @@ function TableData() {
     { name: "I", companyId: "3" },
   ];
 
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+  const location=useLocation();
   const [dataArr, setDataArr] = useState([]);
   const [data, setData] = useState({
     companyId: "",
     locationId: "",
     isGlobal: false,
+    values:""
   });
-  const [isUpdated,SetIsUpdated]=useState(false)
+  const [isUpdated, SetIsUpdated] = useState(false);
 
   const [Show, setShow] = useState(false);
   const [filterLocation, setFilteredLocation] = useState([]);
   const [DisplayData, SetDisplayData] = useState([...dataArr]);
-  
-  
-  axios.defaults.withCredentials=true;
-  useEffect(()=>{
-    axios.get("http://localhost:5000/api/getAllCompanies")
-      .then((res) =>{
-       
-          setDataArr(res.data.data)
-          SetDisplayData(res.data.data)
-          SetIsUpdated(false);
-        console.log(res.data)
-       
-  })
-      .catch(err=>{
-        if(err.response && err.response.status ===401)
 
-          {
-            navigate('/')
-          }
-        console.error(err)
-      }
-      );
-  },[isUpdated]);
+  axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/Company/getAllCompanies")
+      .then((res) => {
+        setDataArr(res.data.data);
+        SetDisplayData(res.data.data);
+        SetIsUpdated(false);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          navigate("/");
+        }
+        console.error(err);
+      });
+  }, [isUpdated]);
 
-  useEffect(()=>{
- axios.get("http://localhost:5000/api/isAuthenticated")
-   .then((res) =>{
-     if(res.data.authenticated)
-       {
-      navigate('/dashboard');
-       }
+
+//     useEffect(()=>{
+//  axios.get("http://localhost:5000/api/Auth/isAuthenticated")
+//    .then((res) =>{
+//      if(res.data.authenticated)
+//        {
+//       navigate('/');
+//        }
    
-})
-   .catch((err)=> 
-   { 
-    console.log(err);
-    // toast.error("Please Login")
-    navigate('/');
-    })
-   },[]);
+// })
+//    .catch((err)=> 
+//    { 
+//     console.log(err);
+    
+//     navigate('/login');
+//     })
+//    },[]);
+
+  useEffect(()=>{
+    const message=location.state?.toastMsg;
+    console.log(message);
+    if(message){
+      toast.success(message,{
+        autoClose:1500
+      })
+      navigate(location.pathname,{replace:true});
+    }
+  },[navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-      
+
     // const updatedData = [...dataArr, data];
 
     // setDataArr([...dataArr, data]);
@@ -88,13 +95,13 @@ function TableData() {
     // SetDisplayData(updatedData);
 
     axios
-      .post("http://localhost:5000/api/add", data)
-      .then(()=> {
-        SetIsUpdated(true)
+      .post("http://localhost:5000/api/Company/add", data)
+      .then(() => {
+        SetIsUpdated(true);
       })
       .catch((err) => console.log(err));
 
-    setData({ companyId: "", locationId: "", isGlobal: false });
+    setData({ companyId: "", locationId: "", isGlobal: false , values:""});
   };
 
   const handleChange = (e) => {
@@ -118,13 +125,11 @@ function TableData() {
 
   function Sort(field) {
     const sortedData = [...DisplayData].sort((a, b) => {
-      let value1=a[field]
-      let value2=b[field]
-      if(asc)
-      {
+      let value1 = a[field];
+      let value2 = b[field];
+      if (asc) {
         return value1.localeCompare(value2);
-      }
-      else{
+      } else {
         return value2.localeCompare(value1);
       }
     });
@@ -139,21 +144,24 @@ function TableData() {
   const [selectedLocation, setSelectedLocation] = useState([]);
 
   const toggleSelect = (value, selectedData, setSelectedData) => {
-    const isSelected= selectedData.includes(value);
-    const selectedCheckbox= isSelected ? selectedData.filter((v)=> v!==value) : [...selectedData, value];
+    const isSelected = selectedData.includes(value);
+    const selectedCheckbox = isSelected
+      ? selectedData.filter((v) => v !== value)
+      : [...selectedData, value];
     setSelectedData(selectedCheckbox);
 
-    if(selectedData===selectedCompany && isSelected){
-      const relatedLocation=locations.filter(v=>v.companyId===value).map(l=>l.name)
-       setSelectedLocation((prev)=>
-        prev.filter((loc)=>!relatedLocation.includes(loc))
+    if (selectedData === selectedCompany && isSelected) {
+      const relatedLocation = locations
+        .filter((v) => v.companyId === value)
+        .map((l) => l.name);
+      setSelectedLocation((prev) =>
+        prev.filter((loc) => !relatedLocation.includes(loc))
       );
     }
-    console.log("Selected",isSelected);
-    console.log("SelectedCompanes",selectedCompany)
-    console.log("selectedCheckbox",selectedCheckbox);
-    console.log("location",locations);
-
+    console.log("Selected", isSelected);
+    console.log("SelectedCompanes", selectedCompany);
+    console.log("selectedCheckbox", selectedCheckbox);
+    console.log("location", locations);
   };
 
   const AvailableLocation = [
@@ -201,11 +209,12 @@ function TableData() {
     console.log("Filtered Data", FilterData);
   };
 
-  const DeleteItem = async(id) => {
-    console.log("dlete",id)
-    await axios.delete(`http://localhost:5000/delete/${id}`)
-    .then(()=>SetIsUpdated(true))
-    .catch((err)=>console.log(err))
+  const DeleteItem = async (id) => {
+    console.log("dlete", id);
+    await axios
+      .delete(`http://localhost:5000/api/Company/delete/${id}`)
+      .then(() => SetIsUpdated(true))
+      .catch((err) => console.log(err));
   };
 
   const [searchInput, setSearchInput] = useState();
@@ -213,12 +222,8 @@ function TableData() {
   const SearchData = (e) => {
     const searchValue = e.target.value.toUpperCase();
     setSearchInput(searchValue);
-    //this is becasue i am initial setting the filter
-    // state with while data so that after filter checkboc
-    // is applied and cleared it stores the whole data in the filter
-    // applied before
-    // searchin is done other wise older filter data will be considered
-    setFilterApplied([...DisplayData]);
+
+    console.log("inside search", filterApplied);
     if (searchValue.trim() === "") {
       SetDisplayData([...filterApplied]);
       return;
@@ -230,6 +235,8 @@ function TableData() {
         item.locationId.includes(searchValue)
     );
 
+    console.log("inside search display data", DisplayData);
+    console.log("inside search data", searched);
     SetDisplayData(searched);
   };
 
@@ -239,26 +246,27 @@ function TableData() {
     setSearchInput("");
 
     setAsc(false);
-    // setFilterApplied([...dataArr]);
+    setFilterApplied([...dataArr]);
+    // setFilterApplied([...DisplayData]);
     SetDisplayData([...dataArr]);
   };
 
-  const HandleLogout =()=>{
-    axios.post("http://localhost:5000/api/logout")
-    .then(()=>{
-      // toast.success("Logged oout Successfully")
-      navigate("/",{state:{toastMsg:"logged out Successfully"}
-      });
-    })
-    .catch((err)=>{
-      console.log(err);
-      toast.error("Logout Failed")
-    })
-  }
+  // const HandleLogout = () => {
+  //   axios
+  //     .post("http://localhost:5000/api/Auth/logout")
+  //     .then(() => {
+  //       // toast.success("Logged oout Successfully")
+  //       navigate("/login", { state: { toastMsg: "logged out Successfully" } });
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       toast.error("Logout Failed");
+  //     });
+  // };
 
   return (
     <>
-    <ToastContainer/>
+      <ToastContainer />
       <div className="container-fluid mt-3">
         <div className="d-flex align-items-center gap-3">
           <button
@@ -280,55 +288,53 @@ function TableData() {
               Filter
             </button>
 
-            
-
-            <div
-              className="dropdown-menu p-3"
-            >
+            <div className="dropdown-menu p-3">
               {/* Company Filter (Left Panel) */}
               <div className="d-flex">
-
-              
-              <div style={{ minWidth: "80px" }}>
-                <h6 className="dropdown-header p-0 mb-2">Company</h6>
-                {AvailableCompany.map((company) => (
-                  <div className="form-check ms-2" key={company}>
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={selectedCompany.includes(company)}
-                      onChange={()=>toggleSelect(
-                        company,
-                        selectedCompany,
-                        setSelectedCompany
-                      )}
-                    />
-                    <label className="form-check-label">{company}</label>
-                  </div>
-                ))}
-              </div>
-
-              {/* Location Filter (Right Panel, only if company is selected) */}
-              {selectedCompany.length > 0 && (
                 <div style={{ minWidth: "80px" }}>
-                  <h6 className="dropdown-header p-0 mb-2">Location</h6>
-                  {AvailableLocation.map((location) => (
-                    <div className="form-check ms-2" key={location}>
+                  <h6 className="dropdown-header p-0 mb-2">Company</h6>
+                  {AvailableCompany.map((company) => (
+                    <div className="form-check ms-2" key={company}>
                       <input
-                        className="form-check-input "
+                        className="form-check-input"
                         type="checkbox"
-                        checked={selectedLocation.includes(location)}
-                        onChange={()=>toggleSelect(
-                          location,
-                          selectedLocation,
-                          setSelectedLocation
-                        )}
+                        checked={selectedCompany.includes(company)}
+                        onChange={() =>
+                          toggleSelect(
+                            company,
+                            selectedCompany,
+                            setSelectedCompany
+                          )
+                        }
                       />
-                      <label className="form-check-label">{location}</label>
+                      <label className="form-check-label">{company}</label>
                     </div>
                   ))}
                 </div>
-              )}
+
+                {/* Location Filter (Right Panel, only if company is selected) */}
+                {selectedCompany.length > 0 && (
+                  <div style={{ minWidth: "80px" }}>
+                    <h6 className="dropdown-header p-0 mb-2">Location</h6>
+                    {AvailableLocation.map((location) => (
+                      <div className="form-check ms-2" key={location}>
+                        <input
+                          className="form-check-input "
+                          type="checkbox"
+                          checked={selectedLocation.includes(location)}
+                          onChange={() =>
+                            toggleSelect(
+                              location,
+                              selectedLocation,
+                              setSelectedLocation
+                            )
+                          }
+                        />
+                        <label className="form-check-label">{location}</label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -358,15 +364,29 @@ function TableData() {
             onChange={SearchData}
             required
           />
-        <RiLogoutCircleRLine size={30} color="red"  className="ms-auto" onClick={HandleLogout}/>
+          {/* <RiLogoutCircleRLine
+            size={30}
+            color="red"
+            className="ms-auto"
+            onClick={HandleLogout}
+          /> */}
+
+          {/* <MdOutlineExit */}
         </div>
       </div>
       <div className="container-fluid mt-2">
         <div className="row">
           <div className="col">
-            <table className="table">
+            <table className="table table-hover table-responsive">
               <thead className="bg-primary">
                 <tr>
+                  <th
+                    scope="col"
+                    style={{ cursor: "default" }}
+                    className="bg-primary text-white"
+                  >
+                    #
+                  </th>
                   <th
                     scope="col"
                     onClick={() => Sort("companyId")}
@@ -393,6 +413,9 @@ function TableData() {
                       <FaLongArrowAltUp style={{ color: "white" }} />
                     )}
                   </th>
+                   <th scope="col" className="bg-primary text-white">
+                    Values
+                  </th>
                   <th scope="col" className="bg-primary text-white">
                     IsGlobal
                   </th>
@@ -407,9 +430,10 @@ function TableData() {
                 ) : (
                   DisplayData.map((data, index) => (
                     <tr key={index}>
-                      {/* <th key={index}>{index + 1}</th> */}
+                      <td key={index}>{index + 1}</td>
                       <td>{data.companyId}</td>
                       <td>{data.locationId}</td>
+                      <td>{data.values}</td>
                       <td
                         className={`text-${
                           data.isGlobal === false ? "danger" : "success"
@@ -420,11 +444,7 @@ function TableData() {
                       <td>
                         <FaTrash
                           style={{ color: "red" }}
-                          onClick={() =>
-                            DeleteItem(
-                             data._id
-                            )
-                          }
+                          onClick={() => DeleteItem(data._id)}
                         />
                       </td>
                     </tr>
@@ -493,6 +513,17 @@ function TableData() {
                       </option>
                     ))}
                   </select>
+                 <div className="form-group mt-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="values"
+                      value={data.values}
+                      onChange={handleChange}
+                      placeholder="Enter the Values"
+                    />
+                    {/* <label className="form-check-label ms-2">Values</label> */}
+                  </div>
                   <div className="form-group mt-3">
                     <input
                       type="checkbox"
@@ -503,6 +534,7 @@ function TableData() {
                     />
                     <label className="form-check-label ms-2">Is Global</label>
                   </div>
+
                   <button type="submit" className="btn btn-warning mt-2">
                     Add
                   </button>

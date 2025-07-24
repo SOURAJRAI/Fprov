@@ -27,7 +27,7 @@ function Signup() {
     const pass2 = signUpCredentials["confirmPassword"];
 
     if (pass1 !== pass2) {
-      alert("Password Doesnt match");
+      toast.error("Password Doesnt match");
       return;
     }
 
@@ -38,7 +38,7 @@ function Signup() {
     });
 
     axios
-      .post("http://localhost:5000/api/signup", {
+      .post("http://localhost:5000/api/Auth/signup", {
         username: username,
         email: email,
         password: pass1,
@@ -47,18 +47,22 @@ function Signup() {
         if (res.data.Signup) {
           toast.success("User Registered");
           navigate("/login");
-        } else {
-          toast.error(res.data.message);
-        }
-      })
-      .catch((err) => console.log(err));
-
-    setSignUpCredentials({
+             setSignUpCredentials({
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
     });
+        } else {
+          toast.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+            toast.error(err.response.data.message);
+
+        console.log(err)});
+
+ 
   };
 
   return (

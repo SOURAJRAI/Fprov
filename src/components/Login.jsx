@@ -20,11 +20,11 @@ function Login() {
   };
 
   useEffect(()=>{
- axios.get("http://localhost:5000/api/isAuthenticated")
+ axios.get("http://localhost:5000/api/Auth/isAuthenticated")
    .then((res) =>{
      if(res.data.authenticated)
        {
-      navigate('/dashboard');
+      navigate('/');
        }
    
 })
@@ -32,7 +32,7 @@ function Login() {
    { 
     console.log(err);
     
-    navigate('/');
+    // navigate('/');
     })
    },[]);
 
@@ -41,6 +41,7 @@ function Login() {
 
      useEffect(()=>{
       const message=location.state?.toastMsg;
+    
         if(message)
         {
           toast.success(message,{ autoClose:1500});
@@ -59,16 +60,14 @@ function Login() {
 
 
     axios
-      .post("http://localhost:5000/api/login", loginCredentials)
+      .post("http://localhost:5000/api/Auth/login", loginCredentials)
       .then((result) => {
         console.log(result.data);
         if (result.data.Login) {
-          toast.success("Login SuccessFull",{
-            autoClose:1400
-          })
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1500);
+       
+         
+            navigate("/",{state:{toastMsg:"Login Successfull"}});
+         
           console.log("result", result);
         } 
       })
