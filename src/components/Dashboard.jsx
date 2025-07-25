@@ -16,7 +16,7 @@ function Dashboard() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/Company/getAllCompanies")
+      .get("http://localhost:5000/api/Company/GetDashboardData")
       .then((res) => {
         const data1 = res.data.data;
         const data = [...data1];

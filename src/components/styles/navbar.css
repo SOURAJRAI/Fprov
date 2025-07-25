@@ -3,26 +3,46 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: 72px;
   background: #2c3e50;
   padding: 0 24px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1000;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-top: 12px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 50px;
+}
+
+.user-icon {
+  font-size: 24px;
+  color: white;
 }
 
 .navbar-brand h2 {
   color: white;
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .nav-item {
@@ -32,52 +52,23 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.nav-item:hover {
-  background-color: #34495e;
-}
-
-.nav-item i {
-  font-size: 16px;
 }
 
 .logout-btn {
   background: #e74c3c;
-  border: none;
   color: white;
+  border: none;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.3s;
 }
 
-.logout-btn:hover {
-  background: #c0392b;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
-  }
-
   .nav-item span,
   .logout-btn span {
     display: none;
-  }
-
-  .nav-item,
-  .logout-btn {
-    padding: 8px;
-  }
-
-  .navbar-brand h2 {
-    font-size: 1.2rem;
   }
 }

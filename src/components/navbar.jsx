@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../components/styles/navbar.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import {SiOpenai} from "react-icons/si";
+import { FaUserShield, FaUserTie } from 'react-icons/fa';
+
 
 import IsAdminCheck from '../utils/isAdminCheck';
 
@@ -16,6 +19,7 @@ const Navbar = () => {
         // toast.success("Logged oout Successfully")
         navigate("/login", { state: { toastMsg: "logged out Successfully" } });
         console.log("isAdmin",isAdmin)
+        console.log("username",userName)
       })
       .catch((err) => {
         console.log(err);
@@ -23,13 +27,21 @@ const Navbar = () => {
       });
   };
 
-  const isAdmin=IsAdminCheck();
+  const {isAdmin}=IsAdminCheck();
+  const {userName}=IsAdminCheck();
 
 
  return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <h2>Company Name</h2>
+         <div className="navbar-brand">
+    
+        <div className="user-info">
+          {userName === "admin" ? 
+            <FaUserShield className="user-icon" /> : 
+            <FaUserTie className="user-icon" />
+          }
+          <h2>{userName?.toUpperCase()}</h2>
+        </div>
       </div>
       
       <div className="nav-links">

@@ -8,6 +8,7 @@ function IsAdminCheck() {
 
     
     const [isAdmin, setIsAdmin] = useState(false);
+    const [userName,setUserName]=useState();
 
     const navigate=useNavigate();
   axios.defaults.withCredentials=true;
@@ -16,18 +17,29 @@ function IsAdminCheck() {
         .get("http://localhost:5000/api/Auth/isAdmin")
         .then((res)=>{
             console.log("inside navbar",res);
+            if(res.data.user.Privilage){
+              setIsAdmin(true);
+              setUserName(res.data.user.username);
+            }else{
+              setIsAdmin(false);
+              setUserName(res.data.user.username)
+              navigate('/');
+            }
             
-          setIsAdmin(true);
-
+          
         })
         .catch((err)=>{
-          setIsAdmin(false);
-            navigate('/');
+            setIsAdmin(false);
+            navigate('/login',{state:{
+              toastMsg:err.response.data.message
+            }});
           console.log("Error ",err)
         });
-  }, []);
+  }, [navigate]);
 
-  return isAdmin;
+  return{
+      isAdmin,userName
+  } 
 }
 
 export default IsAdminCheck;

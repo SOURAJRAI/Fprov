@@ -3,9 +3,11 @@ import axios from "axios";
 
 import { Navigate, Outlet } from "react-router-dom";
 import { ScaleLoader } from "react-spinners";
+import IsAdminCheck from "./isAdminCheck";
 
 function ProtectedRoutes() {
   const [isAuth, setIsAuth] = useState(null);
+
   axios.defaults.withCredentials = true;
 
   useEffect(() => {
@@ -26,6 +28,10 @@ function ProtectedRoutes() {
       authorise();
     }, 1000);
   }, []);
+
+
+
+
   if (isAuth === null) {
     console.log(isAuth);
     return (
