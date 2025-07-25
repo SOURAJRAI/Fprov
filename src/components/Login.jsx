@@ -1,9 +1,10 @@
 import axios from "axios";
-import React from "react";
+
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { AdminContext } from "../utils/AdminProvider";
 
 function Login() {
   const navigate = useNavigate();
@@ -12,7 +13,6 @@ function Login() {
     password: "",
   });
   
-
   const HandleChange = (e) => {
     setLoginCredentials({
       ...loginCredentials,
@@ -65,11 +65,9 @@ function Login() {
       .then((result) => {
         console.log(result.data);
         if (result.data.Login) {
-       
-         
+          // setIsAdmin(result.data.user.Privilage)
+          // setUserName(result.data.user.username)
             navigate("/",{state:{toastMsg:"Login Successfull"}});
-            
-         
           console.log("result", result);
         } 
       })

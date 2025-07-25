@@ -11,6 +11,7 @@ import Navbar from "./components/navbar";
 import Layout from "./utils/layout";
 import Dashboard from "./components/Dashboard";
 import AdminRoute from "./utils/AdminCheck";
+import AdminProvider from "./utils/AdminProvider";
 
 
 
@@ -21,6 +22,8 @@ function App() {
 
   return (
     <>
+    <AdminProvider>
+
       <ToastContainer position="top-right" />
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -36,6 +39,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
+    </AdminProvider>
     </>
   );
 }

@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -38,7 +38,7 @@ function AdminProvider( {children}) {
   }, [navigate]);
 
   return (
-      <AdminContext.Provider values={{isAdmin,userName}}>
+      <AdminContext.Provider value={{isAdmin,setIsAdmin,userName,setUserName}}>
           {children}
       </AdminContext.Provider>
   )

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../components/styles/navbar.css';
 import { toast } from 'react-toastify';
@@ -8,6 +8,7 @@ import { FaUserShield, FaUserTie } from 'react-icons/fa';
 
 
 import IsAdminCheck from '../utils/isAdminCheck';
+import { AdminContext } from '../utils/AdminProvider';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -27,8 +28,12 @@ const Navbar = () => {
       });
   };
 
-  const {isAdmin}=IsAdminCheck();
-  const {userName}=IsAdminCheck();
+  // const {isAdmin}=IsAdminCheck();0
+  // const {userName}=IsAdminCheck();
+
+  
+  const {isAdmin,userName}=useContext(AdminContext)
+  console.log("Inisde iS ADmin",isAdmin)
 
 
  return (
